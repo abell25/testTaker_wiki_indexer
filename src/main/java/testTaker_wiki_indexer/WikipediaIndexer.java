@@ -15,7 +15,9 @@ import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.util.Version;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -46,10 +48,10 @@ public class WikipediaIndexer {
         Path indexPath = Paths.get(this.indexPath);
         field = (field != null && !field.isEmpty()) ? field : "Text";
 
-        IndexReader reader = DirectoryReader.open(FSDirectory.open(indexPath));
+        IndexReader reader = DirectoryReader.open(FSDirectory.open(new File(this.indexPath)));
         IndexSearcher searcher = new IndexSearcher(reader);
-        Analyzer analyzer = new StandardAnalyzer();
-        QueryParser parser = new QueryParser(field, analyzer);
+        Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_4_9);
+        QueryParser parser = new QueryParser(Version.LUCENE_4_9, field, analyzer);
 
         Query query = parser.parse(queryString);
         System.out.println("Searching for: " + query.toString(field));

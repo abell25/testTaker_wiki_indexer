@@ -26,8 +26,8 @@ public class Main {
 	public static void main(String[] args) throws Exception {
 		System.out.println("Started!");
 		
-		//CreateWikipediaBooksIndex();
-		SearchWikipediaBooksIndex("cell");
+		CreateWikipediaFilesIndex();
+		SearchWikipediaFilesIndex("cell");
 
 		System.out.println("Completed!");
 
@@ -59,7 +59,9 @@ public class Main {
 	public static void CreateWikipediaBooksIndex() throws Exception {
 		String wikipediaXmlDump = "/media/tony/ssd/TestTakerData/enwikibooks-20151102-pages-articles.xml";
 		String indexPath        = "/media/tony/ssd/TestTakerData/wikipedia_books_index";
-		//wikipediaXmlDump        = "/media/tony/ssd/temp/wikibooks_100k.xml";
+
+		//wikipediaXmlDump = "/home/tony/code/python/notebooks/MyLib/TestTaker/enwikibooks-20151102-pages-articles.xml";
+		//indexPath = "/home/tony/code/python/notebooks/MyLib/TestTaker/wikipedia_books_index";
 
 		WikipediaIndexer wikipediaIndexer = new WikipediaIndexer(indexPath);
 		wikipediaIndexer.CreateIndex(wikipediaXmlDump);

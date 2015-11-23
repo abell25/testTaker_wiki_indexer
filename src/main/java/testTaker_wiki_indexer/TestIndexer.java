@@ -1,9 +1,6 @@
 package testTaker_wiki_indexer;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -28,6 +25,7 @@ import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.util.Version;
 
 
 public class TestIndexer {
@@ -43,14 +41,14 @@ public class TestIndexer {
 			Path inPath = Paths.get(inDir);
 			Path indexPath = Paths.get(indexDir);
 
-			Directory dir = FSDirectory.open(indexPath);
-			Analyzer analyzer = new StandardAnalyzer();
-			IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
+			Directory dir = FSDirectory.open(new File(indexDir));
+			Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_4_9);
+			IndexWriterConfig iwc = new IndexWriterConfig(Version.LUCENE_4_9, analyzer);
 			//Create a new index
 			iwc.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
 			IndexWriter writer = new IndexWriter(dir, iwc);
 
-			RecursivelyIndexFiles(writer, inPath);
+			RecursivelyIndexFiles(writer, inDir);
 
 			//This should only be called for static indexes
 			//it's a large 1 time cost that speeds up searching performance
@@ -65,7 +63,9 @@ public class TestIndexer {
 		}
 	}
 
-	public void RecursivelyIndexFiles(final IndexWriter writer, Path path) throws IOException {
+	public void RecursivelyIndexFiles(final IndexWriter writer, String pathString) throws IOException {
+		Path path = Paths.get(pathString);
+
 		if (Files.isDirectory(path)) {
 			Files.walkFileTree(path, new SimpleFileVisitor<Path>(){
 				@Override
@@ -90,7 +90,8 @@ public class TestIndexer {
 	public void IndexFile(IndexWriter writer, Path file) throws IOException {
 		System.out.println("Indexing " + file.toString());
 
-		try(InputStream stream = Files.newInputStream(file)) {
+		InputStream stream = Files.newInputStream(file);
+		try {
 			BufferedReader reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
 
 			Document doc = new Document();
@@ -102,6 +103,8 @@ public class TestIndexer {
 			doc.add(contentsField);
 
 			writer.addDocument(doc);
+		} finally {
+			stream.close();
 		}
 	}
 
@@ -114,10 +117,10 @@ public class TestIndexer {
 		Path indexPath = Paths.get(indexDir);
 		field = (field != null && !field.isEmpty()) ? field : "contents";
 
-		IndexReader reader = DirectoryReader.open(FSDirectory.open(indexPath));
+		IndexReader reader = DirectoryReader.open(FSDirectory.open(new File(indexDir)));
 		IndexSearcher searcher = new IndexSearcher(reader);
-		Analyzer analyzer = new StandardAnalyzer();
-		QueryParser parser = new QueryParser(field, analyzer);
+		Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_4_9);
+		QueryParser parser = new QueryParser(Version.LUCENE_4_9, field, analyzer);
 
 		Query query = parser.parse(queryString);
 		System.out.println("Searching for: " + query.toString(field));

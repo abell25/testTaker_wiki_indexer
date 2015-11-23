@@ -16,9 +16,13 @@ public class WikiTextParser {
     private boolean stub = false;
     private boolean disambiguation = false;
 
-    private static Pattern redirectPattern = Pattern.compile("#REDIRECT\\s+\\[\\[(.*?)\\]\\]");
-    private static Pattern stubPattern = Pattern.compile("\\-stub\\}\\}");
-    private static Pattern disambCatPattern = Pattern.compile("\\{\\{disambig\\}\\}");
+    private static Pattern redirectPattern = Pattern.compile("#REDIRECT\\s+\\[\\[(.*?)\\]\\]", Pattern.CASE_INSENSITIVE);
+    private static Pattern stubPattern = Pattern.compile("\\-stub\\}\\}", Pattern.CASE_INSENSITIVE);
+    private static Pattern disambCatPattern = Pattern.compile("\\{\\{disambig\\}\\}", Pattern.CASE_INSENSITIVE);
+
+    private static String removeWikipediaEmbeddings = "(\\[\\[.*?\\]\\]|\\{\\{.*?\\}\\}|\\{\\|.*?\\|\\})";
+    private static String removeAllNonTextStuff = "[\\na-zA-Z0-9_-]+";
+    private static String removeExtraNewlinesAndSpacesArroundNewlines = "([ \\t]*[\\n]+[ \\t]*)+";
 
     public WikiTextParser(String wtext) {
         wikiText = wtext;
@@ -32,6 +36,12 @@ public class WikiTextParser {
         stub = matcher.find();
         matcher = disambCatPattern.matcher(wikiText);
         disambiguation = matcher.find();
+    }
+
+    public String getCleanText() {
+        return wikiText.replaceAll(removeWikipediaEmbeddings, "")
+                       .replaceAll(removeAllNonTextStuff, " ")
+                       .replaceAll(removeExtraNewlinesAndSpacesArroundNewlines, "\\n");
     }
 
     public boolean isRedirect() {

@@ -22,14 +22,12 @@ public class WikiPage {
     }
 
     public String getCleanedText() {
-        return Text;
-//return wikiTextParser.getPlainText
-
-
+        return wikiTextParser.getPlainText();
     }
 
-    public Boolean isReference() {
-        return wikiTextParser.isRedirect();
+    public Boolean isContentPage() { return !wikiTextParser.isRedirect() &&
+                                            !wikiTextParser.isDisambiguationPage() &&
+                                            !wikiTextParser.isStub();
     }
 
 }

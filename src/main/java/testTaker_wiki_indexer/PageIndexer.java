@@ -10,7 +10,9 @@ import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.util.Version;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -26,18 +28,17 @@ public class PageIndexer implements PageCallbackHandler {
         System.out.println("Starting indexing of wikipedia dump!");
 
         Path indexPath = Paths.get(indexDir);
-        Directory dir = FSDirectory.open(indexPath);
-        Analyzer analyzer = new StandardAnalyzer();
-        IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
+        Directory dir = FSDirectory.open(new File(indexDir));
+        Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_4_9);
+        IndexWriterConfig iwc = new IndexWriterConfig(Version.LUCENE_4_9, analyzer);
         //Create a new index
         iwc.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
         this.writer = new IndexWriter(dir, iwc);
     }
 
-    @Override
     public void process(WikiPage page) {
         try {
-            if (!page.isReference()) {
+            if (page.isContentPage()) {
                 Document doc = new Document();
 
                 Field titleField = new StringField("Title", page.Title, Field.Store.YES);
